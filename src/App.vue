@@ -1,16 +1,8 @@
-  
 <template>
-  <v-app id="inspire">
-    <v-navigation-drawer
-      v-model="drawer"
-      app
-    >
-      <!--  -->
-    </v-navigation-drawer>
-
+  <v-app>
+    <Sidebar></Sidebar>
     <v-app-bar app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-
+      <v-app-bar-nav-icon @click="drawerState = !drawerState"></v-app-bar-nav-icon>
       <v-toolbar-title>Application</v-toolbar-title>
     </v-app-bar>
 
@@ -21,10 +13,17 @@
 <script>
 // imports
 import Map from "./components/Map";
-  export default {
-    components: {
-      Map
-	},
-    data: () => ({ drawer: null }),
-  }
+import Sidebar from "./components/Sidebar";
+export default {
+  components: {
+    Sidebar,
+    Map,
+  },
+  computed: {
+    drawerState: {
+      get () { return this.$store.getters.drawerState },
+      set (v) { return this.$store.commit('toggleDrawerState', v) }
+    },
+  },
+};
 </script>
