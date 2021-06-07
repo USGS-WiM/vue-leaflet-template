@@ -10,7 +10,7 @@ A simple project template utilizing Vue, Leaflet, and USWDS
 What things you need to install the software and how to install them
 
 ```
-Give examples
+Vue 2
 ```
 
 ## Getting Started
