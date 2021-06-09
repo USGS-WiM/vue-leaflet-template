@@ -2,6 +2,7 @@
   <v-main>
     <div style="height: 100%; width: 100%">
       <l-map
+        ref="map"
         v-if="showMap"
         :zoom="zoom"
         :center="center"
@@ -9,6 +10,8 @@
         style="height: 80%"
         @update:center="centerUpdate"
         @update:zoom="zoomUpdate"
+        @update:th="zoomUpdate"
+        @mousemove="getlatlng"
       >
         <l-tile-layer
         v-for="tileProvider in tileProviders"
@@ -23,7 +26,7 @@
       <l-control-scale position="topright" :imperial="true" :metric="false"/>
       <l-control position="bottomleft" >
         <button>
-          Current Center: {{ currentCenter }}
+          lat long: {{ lat }}, {{ long }}
           <br/>
           Current Zoom: {{ currentZoom }}
         </button>
@@ -127,6 +130,8 @@ export default {
   data() {
     return {
       zoom: 12,
+      lat: 0,
+      long: 0,
       center: latLng(47.41322, -1.219482),
       tileProviders: tileProviders,
       //url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -156,6 +161,10 @@ export default {
     innerClick() {
       alert("Click!");
     },
+    getlatlng: function(event) {
+      this.lat = event.latlng.lat;
+      this.long = event.latlng.lng;
+    }
   },
 };
 </script>
