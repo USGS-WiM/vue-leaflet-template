@@ -1,7 +1,6 @@
 <template>
-  <v-main>
-    <div style="height: 100%; width: 100%">
-      <l-map
+    <div>
+    <l-map
         v-if="showMap"
         :zoom="zoom"
         :center="center"
@@ -10,7 +9,12 @@
         @update:center="centerUpdate"
         @update:zoom="zoomUpdate"
       >
-        <l-tile-layer
+    <l-control-layers
+        :position="layersPosition"
+        :collapsed="false"
+        :sort-layers="false"
+      />
+      <l-tile-layer
         v-for="tileProvider in tileProviders"
         :key="tileProvider.name"
         :name="tileProvider.name"
@@ -20,51 +24,13 @@
         :token="token"
         layer-type="base"
       />
-      <l-control-scale position="topright" :imperial="true" :metric="false"/>
-      <l-control position="bottomleft" >
-        <button>
-          Current Center: {{ currentCenter }}
-          <br/>
-          Current Zoom: {{ currentZoom }}
-        </button>
-</l-control>
-      <l-control-layers
-        :position="layersPosition"
-        :collapsed="true"
-        :sort-layers="false"
-      />
-        <l-marker :lat-lng="withPopup">
-          <l-popup>
-            <div @click="innerClick">
-              I am a popup
-              <p v-show="showParagraph">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-                Donec finibus semper metus id malesuada.
-              </p>
-            </div>
-          </l-popup>
-        </l-marker>
-        <l-marker :lat-lng="withTooltip">
-          <l-tooltip :options="{ permanent: true, interactive: true }">
-            <div @click="innerClick">
-              I am a tooltip
-              <p v-show="showParagraph">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-                Donec finibus semper metus id malesuada.
-              </p>
-            </div>
-          </l-tooltip>
-        </l-marker>
       </l-map>
-    </div>
-  </v-main>
+      </div>
 </template>
 
 <script>
 import { latLng } from "leaflet";
-import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControlLayers, LControlScale, LControl } from "vue2-leaflet";
+import { LMap, LTileLayer, LControlLayers } from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 
 var tileProviders = [
@@ -117,12 +83,7 @@ export default {
   components: {
     LMap,
     LTileLayer,
-    LMarker,
-    LPopup,
-    LTooltip,
     LControlLayers,
-    LControlScale,
-    LControl
   },
   data() {
     return {
