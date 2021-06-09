@@ -6,9 +6,10 @@
         :zoom="zoom"
         :center="center"
         :options="mapOptions"
-        style="height: 80%"
+        style="height: 98%"
         @update:center="centerUpdate"
         @update:zoom="zoomUpdate"
+        @mousemove="getLatLng"
       >
         <l-tile-layer
         v-for="tileProvider in tileProviders"
@@ -23,11 +24,15 @@
       <l-control-scale position="topright" :imperial="true" :metric="false"/>
       <l-control position="bottomleft" >
         <button>
-          Current Center: {{ currentCenter }}
+          Latitude: {{ lat }}, Longitude: {{ long }}
           <br/>
           Current Zoom: {{ currentZoom }}
         </button>
 </l-control>
+<l-geo-json 
+  v-if="show"
+  :geojson="geojson"
+  :options-style="styleFunction"/>
       <l-control-layers
         :position="layersPosition"
         :collapsed="true"
@@ -64,7 +69,7 @@
 
 <script>
 import { latLng } from "leaflet";
-import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControlLayers, LControlScale, LControl } from "vue2-leaflet";
+import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControlLayers, LControlScale, LControl, LGeoJson } from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 
 var tileProviders = [
@@ -72,28 +77,28 @@ var tileProviders = [
     name: 'Streets',
     visible: false,
     attribution:
-      'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012',
+      'Esri',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
   },
   {
     name: 'Satellite',
     visible: false,
     attribution:
-      'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+      'Esri, DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   },
   {
     name: 'Topo',
     visible: true,
     attribution:
-      'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
+      'Esri',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
   },
   {
     name: 'Terrain',
     visible: false,
     attribution:
-      'Tiles &copy; Esri &mdash; Source: Esri',
+      'Esri, NAVTEQ, DeLorme',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
   },
   {
@@ -101,13 +106,13 @@ var tileProviders = [
     visible: false,
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
     attribution:
-      'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+      'Esri, NAVTEQ, DeLorme',
   },
   {
     name: 'NatGeo',
     visible: false,
     attribution:
-      'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+      'Esri',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}',
   },
 ];
@@ -122,12 +127,16 @@ export default {
     LTooltip,
     LControlLayers,
     LControlScale,
-    LControl
+    LControl,
+    LGeoJson
   },
   data() {
     return {
-      zoom: 12,
-      center: latLng(47.41322, -1.219482),
+      show: true,
+      zoom: 4,
+      lat: 0,
+      long: 0,
+      center: latLng(37.0902, -82.7129),
       tileProviders: tileProviders,
       //url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       //attribution:
@@ -137,11 +146,29 @@ export default {
       currentZoom: 11.5,
       currentCenter: latLng(47.41322, -1.219482),
       showParagraph: false,
+      geojson: null,
+      fillColor: "#ffffff",
       mapOptions: {
         zoomSnap: 0.5,
       },
       showMap: true,
     };
+  },
+  computed: {
+    styleFunction() {
+        return {
+          weight: 2,
+          color: "#ECEFF1",
+          opacity: 1,
+          fillColor: "#ffffff",
+          fillOpacity: 1
+        };
+      }
+    },
+  async created () {
+    const response = await fetch('https://stn.wim.usgs.gov/STNServices/SensorViews.geojson?ViewType=rdg_view&.geojson',
+    );
+    this.geojson = await response.json();
   },
   methods: {
     zoomUpdate(zoom) {
@@ -156,6 +183,24 @@ export default {
     innerClick() {
       alert("Click!");
     },
+    getLatLng: function(event) {
+      this.lat = parseFloat(event.latlng.lat).toFixed(6);
+      this.long = parseFloat(event.latlng.lng).toFixed(6);
+    },
   },
 };
 </script>
+
+<style scoped>
+button {
+  background-color: #ECEEF3;
+  border-radius: 0;
+  border: none;
+  box-shadow: 0 3px 6px rgba(30, 39, 50, 0.2), 0 3px 6px rgba(30, 39, 50, 0.2);
+  color: #6F758E;
+  font-size: 9pt;
+  letter-spacing: 1px;
+  padding: 5px;
+}
+
+</style>
