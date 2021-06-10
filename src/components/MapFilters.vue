@@ -7,10 +7,16 @@
       </v-expansion-panel-header>
       <v-expansion-panel-content>
         <v-container class="px-0" fluid>
-          <v-checkbox
-            v-model="checkbox"
-            :label="`Checkbox 1`"
-          ></v-checkbox>
+            <input type="checkbox" id="stream" value="Stream" v-model="picked" />
+              <label for="stream">Real-time Stream Gage</label>
+              <br/>
+            <input type="checkbox" id="rain" value="Rain" v-model="picked" />
+              <label for="rain">Real-time Rain Gage</label>
+              <br/>
+            <input type="checkbox" id="tidal" value="Tidal" v-model="picked" />
+              <label for="tidal">Tidal Gage</label>
+              <br/>
+              <span>Checked Gages: {{ picked }}</span>
         </v-container>
       </v-expansion-panel-content>
     </v-expansion-panel>
@@ -21,7 +27,7 @@
   export default {
     data () {
       return {
-        picked: '',
+        picked: [],
       }
     },
   }

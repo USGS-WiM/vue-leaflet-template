@@ -29,13 +29,15 @@
           Current Zoom: {{ currentZoom }}
         </button>
 </l-control>
-<l-geo-json :geojson="geojson"></l-geo-json>
+<l-geo-json :geojson="geojson"
+    :icon="nwisIcon"></l-geo-json>
       <l-control-layers
         :position="layersPosition"
         :collapsed="true"
         :sort-layers="false"
       />
-        <l-marker :lat-lng="withPopup">
+        <l-marker :lat-lng="withPopup"
+        :icon="nwisIcon">
           <l-popup>
             <div @click="innerClick">
               I am a popup
@@ -47,7 +49,8 @@
             </div>
           </l-popup>
         </l-marker>
-        <l-marker :lat-lng="withTooltip">
+        <l-marker :lat-lng="withTooltip"
+        :icon="nwisIcon">>
           <l-tooltip :options="{ permanent: true, interactive: true }">
             <div @click="innerClick">
               I am a tooltip
@@ -65,7 +68,7 @@
 </template>
 
 <script>
-import { latLng, Icon } from "leaflet";
+import { latLng, Icon, divIcon } from "leaflet";
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControlLayers, LControlScale, LControl, LGeoJson } from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -149,6 +152,7 @@ export default {
       withTooltip: latLng(47.41422, -1.250482),
       currentZoom: 4,
       currentCenter: latLng(37.0902, -82.7129),
+      nwisIcon: divIcon({className: 'wmm-circle wmm-mutedblue wmm-icon-triangle wmm-icon-black wmm-size-20 wmm-borderless'}),
       showParagraph: false,
       geojson: null,
       fillColor: "#ffffff",
@@ -185,6 +189,7 @@ export default {
 </script>
 
 <style scoped>
+  @import '../styles/markers.css';
 button {
   background-color: #ECEEF3;
   border-radius: 0;
