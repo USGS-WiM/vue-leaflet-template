@@ -1,6 +1,7 @@
 <template>
   <v-main>
     <div style="height: 100%; width: 100%">
+    <!-- a leaflet map -->
       <l-map
         v-if="showMap"
         :zoom="zoom"
@@ -9,8 +10,9 @@
         style="height: 98%"
         @update:center="centerUpdate"
         @update:zoom="zoomUpdate"
-        @mousemove="getLatLng"
+        @mousemove="getLatLng" 
       >
+      <!-- basemaps -->
         <l-tile-layer
         v-for="tileProvider in tileProviders"
         :key="tileProvider.name"
@@ -21,57 +23,45 @@
         :token="token"
         layer-type="base"
       />
+      <!-- dynamic scale in miles or kilometers -->
       <l-control-scale position="topright" :imperial="true" :metric="false"/>
+      <!-- dynamic scale in zoom level and current lat/long of mouse -->
       <l-control position="bottomleft" >
         <button>
           Latitude: {{ lat }}, Longitude: {{ long }}
           <br/>
           Current Zoom: {{ currentZoom }}
         </button>
-</l-control>
-<l-geo-json :geojson="geojson"
-    :icon="nwisIcon"></l-geo-json>
+      </l-control>
+      <!-- to load a geojson -->
+      <l-geo-json :geojson="geojson"></l-geo-json>
+      <!-- leaflet control panel -->
       <l-control-layers
         :position="layersPosition"
         :collapsed="true"
-        :sort-layers="false"
-      />
-        <l-marker :lat-lng="withPopup"
-        :icon="nwisIcon">
-          <l-popup>
-            <div @click="innerClick">
-              I am a popup
-              <p v-show="showParagraph">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-                Donec finibus semper metus id malesuada.
-              </p>
-            </div>
-          </l-popup>
-        </l-marker>
-        <l-marker :lat-lng="withTooltip"
-        :icon="nwisIcon">>
-          <l-tooltip :options="{ permanent: true, interactive: true }">
-            <div @click="innerClick">
-              I am a tooltip
-              <p v-show="showParagraph">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-                Donec finibus semper metus id malesuada.
-              </p>
-            </div>
-          </l-tooltip>
-        </l-marker>
+        :sort-layers="false"/>
+      <!-- markers (these ones use custom wim divIcon styling not leaflet default) -->
+      <l-layer-group 
+        layer-type="overlay"
+        name="Markers"
+        :visible="true">
+        <l-marker v-for="marker in markers"
+            :key="marker.id"
+            :visible="marker.visible"
+            :lat-lng="marker.position"
+            :icon="nwisIcon"/>
+        </l-layer-group>
       </l-map>
     </div>
   </v-main>
 </template>
 
 <script>
-import { latLng, Icon, divIcon } from "leaflet";
-import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControlLayers, LControlScale, LControl, LGeoJson } from "vue2-leaflet";
+import { latLng, Icon, divIcon } from "leaflet"; //this is where you import leaflet components not found in vue2-leaflet
+import { LMap, LTileLayer, LMarker, LControlLayers, LControlScale, LControl, LGeoJson, LLayerGroup } from "vue2-leaflet"; //this is where you import components made easy by vue2-leaflet
 import "leaflet/dist/leaflet.css";
 
+//this code is necessary for the default leaflet marker to work
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -79,6 +69,7 @@ Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+//define basemaps
 var tileProviders = [
   {
     name: 'Streets',
@@ -130,12 +121,11 @@ export default {
     LMap,
     LTileLayer,
     LMarker,
-    LPopup,
-    LTooltip,
     LControlLayers,
     LControlScale,
     LControl,
-    LGeoJson
+    LGeoJson,
+    LLayerGroup
   },
   data() {
     return {
@@ -148,11 +138,29 @@ export default {
       //url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       //attribution:
         //'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      withPopup: latLng(47.41322, -1.219482),
-      withTooltip: latLng(47.41422, -1.250482),
+      markers: [
+        {
+          id: "m1",
+          position: { lat: 43.0689, lng: -89.3405 },
+          draggable: true,
+          visible: true
+        },
+        {
+          id: "m2",
+          position: { lat: 44.9492, lng: -93.2077 },
+          draggable: true,
+          visible: true
+        },
+        {
+          id: "m3",
+          position: { lat: 38.9252, lng: -76.4646 },
+          draggable: true,
+          visible: true
+        },
+      ],
       currentZoom: 4,
       currentCenter: latLng(37.0902, -82.7129),
-      nwisIcon: divIcon({className: 'wmm-circle wmm-mutedblue wmm-icon-triangle wmm-icon-black wmm-size-20 wmm-borderless'}),
+      nwisIcon: divIcon({className: 'wmm-circle wmm-mutedblue wmm-icon-triangle wmm-icon-black wmm-size-20 wmm-borderless'}), //custom WIM icons
       showParagraph: false,
       geojson: null,
       fillColor: "#ffffff",
@@ -162,11 +170,12 @@ export default {
       showMap: true,
     };
   },
-  async created () {
+  //if you want to load a geojson layer
+  /*async created () {
     const response = await fetch('https://stn.wim.usgs.gov/STNServices/SensorViews.geojson?ViewType=baro_view&',
     );
     this.geojson = await response.json();
-  },
+  },*/
   methods: {
     zoomUpdate(zoom) {
       this.currentZoom = zoom;
@@ -174,21 +183,15 @@ export default {
     centerUpdate(center) {
       this.currentCenter = center;
     },
-    showLongText() {
-      this.showParagraph = !this.showParagraph;
-    },
-    innerClick() {
-      alert("Click!");
-    },
     getLatLng: function(event) {
       this.lat = parseFloat(event.latlng.lat).toFixed(6);
       this.long = parseFloat(event.latlng.lng).toFixed(6);
-    }
+    },
   },
 };
 </script>
 
-<style scoped>
+<style scoped> /*placing "scoped" after style affects only the current file*/
   @import '../styles/markers.css';
 button {
   background-color: #ECEEF3;

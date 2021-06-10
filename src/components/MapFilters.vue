@@ -7,6 +7,7 @@
       </v-expansion-panel-header>
       <v-expansion-panel-content>
         <v-container class="px-0" fluid>
+        <!-- these are not actually linked to anything right now, just an example of what is possible! -->
             <input type="checkbox" id="stream" value="Stream" v-model="picked" />
               <label for="stream">Real-time Stream Gage</label>
               <br/>
