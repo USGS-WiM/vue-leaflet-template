@@ -29,10 +29,7 @@
           Current Zoom: {{ currentZoom }}
         </button>
 </l-control>
-<l-geo-json 
-  v-if="show"
-  :geojson="geojson"
-  :options-style="styleFunction"/>
+<l-geo-json :geojson="geojson"></l-geo-json>
       <l-control-layers
         :position="layersPosition"
         :collapsed="true"
@@ -68,9 +65,16 @@
 </template>
 
 <script>
-import { latLng } from "leaflet";
+import { latLng, Icon } from "leaflet";
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LControlLayers, LControlScale, LControl, LGeoJson } from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
+
+delete Icon.Default.prototype._getIconUrl;
+Icon.Default.mergeOptions({
+    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+    iconUrl: require('leaflet/dist/images/marker-icon.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
 
 var tileProviders = [
   {
@@ -154,19 +158,8 @@ export default {
       showMap: true,
     };
   },
-  computed: {
-    styleFunction() {
-        return {
-          weight: 2,
-          color: "#ECEFF1",
-          opacity: 1,
-          fillColor: "#ffffff",
-          fillOpacity: 1
-        };
-      }
-    },
   async created () {
-    const response = await fetch('https://stn.wim.usgs.gov/STNServices/SensorViews.geojson?ViewType=rdg_view&.geojson',
+    const response = await fetch('https://stn.wim.usgs.gov/STNServices/SensorViews.geojson?ViewType=baro_view&',
     );
     this.geojson = await response.json();
   },
@@ -186,7 +179,7 @@ export default {
     getLatLng: function(event) {
       this.lat = parseFloat(event.latlng.lat).toFixed(6);
       this.long = parseFloat(event.latlng.lng).toFixed(6);
-    },
+    }
   },
 };
 </script>
